@@ -6,9 +6,12 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Utils.InputsManager.SwerveInputsManager;
 import frc.robot.commands.SwerveJoystickCmd;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -22,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 
 
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -32,6 +36,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer
 {
     // The robot's subsystems and commands are defined here...
+      private final Shooter m_shooter = new Shooter();
+    private final Intake m_intake = new Intake();
 
     
     // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -77,6 +83,16 @@ public class RobotContainer
         // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
         // cancelling on release.
         new Trigger(driverController::getBButtonPressed).onTrue(Commands.runOnce(SwerveSubsystem.getInstance()::zeroHeading, SwerveSubsystem.getInstance()));
+        //new Trigger(driverController::get).onTrue(Commands.runOnce(SwerveSubsystem.getInstance()::zeroHeading, SwerveSubsystem.getInstance()));
+        new Trigger(driverController::getAButton).whileTrue(new ParallelCommandGroup( 
+            m_shooter.getRunReverseShooter(),
+            m_intake.getRunOutakeCommand()
+            )
+         );
+         //Run reverse intake when A button is pressed (temp, change to LB when possible)
+        new Trigger(driverController::getXButton).whileTrue(new ParallelCommandGroup(
+            m_shooter.getShooterCommand().withTimeout(1),
+            m_intake.getRunIntakeCommand().withTimeout(2)));
     }
     
     
