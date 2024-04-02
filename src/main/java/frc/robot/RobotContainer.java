@@ -46,7 +46,7 @@ public class RobotContainer
     
     private final SwerveJoystickCmd joystickCmd;
     private final SwerveInputsManager swerveInputsManager;
-    private final SendableChooser<Command> autoChooser;
+    private  SendableChooser<Command> autoChooser;
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer()
     {
@@ -59,8 +59,16 @@ public class RobotContainer
         joystickCmd = new SwerveJoystickCmd(swerveInputsManager);
         SwerveSubsystem.getInstance().setDefaultCommand(joystickCmd);
 
-        autoChooser = AutoBuilder.buildAutoChooser();
+        new Thread (() -> {
+            try {
+                Thread.sleep(1000);
+                autoChooser =
+        AutoBuilder.buildAutoChooser();
+
         SmartDashboard.putData("Auto Routine", autoChooser);
+            }catch (Exception e) {
+            }
+            }).start();
         //Configure the trigger bindings
         configureBindings();
     }
